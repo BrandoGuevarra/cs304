@@ -10,7 +10,7 @@ public class Connect {
 		Connection con;
 		
 		Statement stmt;
-		String query = "select AU_FNAME from AUTHORS";
+		String query = "select USERNAME from PLAYER where PLAYERLEVEL > 5";
 	
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -26,7 +26,7 @@ public class Connect {
 
 			ResultSet rs = stmt.executeQuery(query);
 			while (rs.next()) {
-				String s = rs.getString("AU_FNAME");
+				String s = rs.getString("USERNAME");
 				System.out.println(s);
 			}
 			

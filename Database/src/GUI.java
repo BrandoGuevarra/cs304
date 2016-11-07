@@ -6,22 +6,37 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+
 import javax.swing.JLabel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
+
 import javax.swing.AbstractAction;
 
-public class GUI {
+public class GUI implements TableModelListener {
 
+	String[] PLAYER_ENTRY = {"USERNAME", "REGION", "PASSWORD", "PLAYERLEVEL", "TIMESREPORTED", 
+			"RIOTPOINTS", "IPPOINTS", "DIVISION", "ACCOUNTSTATUS"};
+	String[] CHAMPION_ENTRY = {"NAME", "CHAMPIONLEVEL", "IPCOST", "ROLE", "PASSIVESKILL", 
+			"FACTION", "SKILLPOINTS"};
 	Database db = new Database();
 	JFrame frame;
 	DefaultTableModel model = null;
 	JTable table;
-	String tableName;
+	String currentTableName;
+	String[] currentEntries;
+	String errorMessage;
 	JMenu mnSelect = new JMenu("Select");
+	JMenu mnView = new JMenu("View");
+	JLabel lblT = new JLabel("Messages");
 
 	public static void main(String[] args) {
 		
@@ -49,18 +64,20 @@ public class GUI {
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
 		
-		menuBar.add(mnSelect);
-		
-		JMenu mnView = new JMenu("View");
 		menuBar.add(mnView);
+		menuBar.add(mnSelect);
 		
 		JMenuItem mntmA = new JMenuItem("Players");
 		mntmA.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String[] entry = {"USERNAME", "REGION", "PASSWORD", "PLAYERLEVEL", "TIMESREPORTED", 
-									"RIOTPOINTS", "IPPOINTS", "DIVISION", "ACCOUNTSTATUS"};
-				String[][] data = db.select(entry, "PLAYER", null);
-				updateTable(data, entry, "PLAYER");
+				String[][] data;
+				try {
+					data = db.select(PLAYER_ENTRY, "PLAYER", null);
+					updateTable(data, PLAYER_ENTRY, "PLAYER");
+				} catch (SQLException e1) {
+					setErrorMessage(e1.getMessage());
+				}
+				table.setEnabled(true);
 			}
 		});
 		mnView.add(mntmA);
@@ -68,28 +85,84 @@ public class GUI {
 		JMenuItem mntmB = new JMenuItem("Champions");
 		mntmB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String[] entry = {"NAME", "CHAMPIONLEVEL", "IPCOST", "ROLE", "PASSIVESKILL", 
-									"FACTION", "SKILLPOINTS"};
-				String[][] data = db.select(entry, "CHAMPION", null);
-				updateTable(data, entry, "CHAMPION");
+				String[][] data;
+				try {
+					data = db.select(CHAMPION_ENTRY, "CHAMPION", null);
+					updateTable(data, CHAMPION_ENTRY, "CHAMPION");
+				} catch (SQLException e1) {
+					setErrorMessage(e1.getMessage());
+				}
+				table.setEnabled(true);
 			}
 		});		
 		mnView.add(mntmB);
-
+		
+		
 		table = new JTable(model);
-		table.setEnabled(false);
 		frame.getContentPane().add(table, BorderLayout.CENTER);
 		frame.getContentPane().add(new JScrollPane(table));
-		
-		JLabel lblT = new JLabel("Messages");
 		frame.getContentPane().add(lblT, BorderLayout.SOUTH);
+	}
+	
+	private void setErrorMessage(String error) {
+		errorMessage = error;
+    	lblT.setText(errorMessage);
+    	lblT.setForeground(Color.red);
 	}
 	
 	private void updateTable(String[][] data, String[] entry, String tableName) {
 		model = new DefaultTableModel(data, entry);
 		table.setModel(model);
-		this.tableName = tableName;		
+		this.currentTableName = tableName;		
+		this.currentEntries = entry;
 		getSelection();
+		table.getModel().addTableModelListener((TableModelListener) this);
+	    lblT.setText(tableName);
+	    lblT.setForeground(Color.blue);	
+		table.setEnabled(false);
+	}
+	
+	//an entry in the table is changed
+	public void tableChanged(TableModelEvent e) {
+        int row = e.getFirstRow();
+        int column = e.getColumn();
+        TableModel model = (TableModel)e.getSource();
+        String columnName = model.getColumnName(column);
+        Object data = model.getValueAt(row, column);
+        String primaryKey = db.getPrimaryKeyName(this.currentTableName);
+        String pkValue;
+        
+        //select query to get old values of database 
+	    Object[][] oldData;
+	    DefaultTableModel oldModel = null;
+		try {
+			oldData = db.select(this.currentEntries, this.currentTableName, null);
+		    oldModel = new DefaultTableModel(oldData, this.currentTableName.split(""));
+
+		} catch (SQLException e2) {
+			e2.printStackTrace();
+		}
+	    
+        //get primary key value at selected row
+        for (column = 0; !model.getColumnName(column).equals(primaryKey); column++);
+        pkValue = (String) oldModel.getValueAt(row, column);
+        
+        try {
+			if (db.update(this.currentTableName, columnName, data, primaryKey, pkValue)) {
+				String[][] newData = db.select(this.currentEntries, this.currentTableName, null);
+				updateTable(newData, this.currentEntries, this.currentTableName);
+				table.setEnabled(true);
+				lblT.setText("UPDATE SUCCESFUL");
+				lblT.setForeground(Color.blue);
+			} else if (pkValue == null) {
+				lblT.setText("UPDATE UNSUCCESFUL Not a valid row");
+				lblT.setForeground(Color.red);
+			}
+		} catch (SQLException e1) {
+			setErrorMessage(e1.getMessage());
+			lblT.setText("UPDATE UNSUCCESFUL " + errorMessage);
+		}
+
 	}
 	
 	//Updates the menu to get current table columns
@@ -136,15 +209,25 @@ public class GUI {
 						" '" + custom.textField_2.getText() + "'";
 						String[] entry = custom.textField.getText().split(",");
 
-						String[][] data = db.select(entry, tableName, customQuery);
-						updateTable(data, entry, tableName);			
+						String[][] data;
+						try {
+							data = db.select(entry, currentTableName, customQuery);
+							updateTable(data, entry, currentTableName);			
+						} catch (SQLException e1) {
+							setErrorMessage(e1.getMessage());
+						}
 						custom.setVisible(false);
 					}
 				});		
 			} else {
 				String[] entry = {this.entry};
-				String[][] data = db.select(entry, tableName, null);
-				updateTable(data, entry, tableName);
+				String[][] data;
+				try {
+					data = db.select(entry, currentTableName, null);
+					updateTable(data, entry, currentTableName);
+				} catch (SQLException e1) {
+					setErrorMessage(e1.getMessage());
+				}
 			}
 		}
 	}

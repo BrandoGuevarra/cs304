@@ -7,6 +7,7 @@ import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 
+@SuppressWarnings("serial")
 public class Custom extends JFrame {
 
 	private JPanel contentPane;

@@ -18,15 +18,17 @@ import javax.swing.JLabel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 
 public class GUI implements TableModelListener {
 
-	String[] PLAYER_ENTRY = {"USERNAME", "REGION", "PASSWORD", "PLAYERLEVEL", "TIMESREPORTED", 
-			"RIOTPOINTS", "IPPOINTS", "DIVISION", "ACCOUNTSTATUS"};
-	String[] CHAMPION_ENTRY = {"NAME", "CHAMPIONLEVEL", "IPCOST", "ROLE", "PASSIVESKILL", 
-			"FACTION", "SKILLPOINTS"};
+	String[] TABLE_NAMES = {"PLAYER", "CHAMPION", "ITEM", "ITEM_UPGRADINTO_ITEM", "CHAMPION_SKILLS1", "CHAMPION_WIELD_ITEM",
+			"PURCHASE_AND_UPGRADE", "REPORT_A_PLAYER"};
 	Database db = new Database();
 	JFrame frame;
 	DefaultTableModel model = null;
@@ -36,6 +38,10 @@ public class GUI implements TableModelListener {
 	String errorMessage;
 	JMenu mnSelect = new JMenu("Select");
 	JMenu mnView = new JMenu("View");
+	JMenu mnReport = new JMenu("Report");
+	JMenu mnChampion = new JMenu("Champion");
+	JMenu mnDelete = new JMenu("Delete");
+	JMenu mnUpdate = new JMenu("Update");
 	JLabel lblT = new JLabel("Messages");
 
 	public static void main(String[] args) {
@@ -66,42 +72,308 @@ public class GUI implements TableModelListener {
 		
 		menuBar.add(mnView);
 		menuBar.add(mnSelect);
-		
-		JMenuItem mntmA = new JMenuItem("Players");
-		mntmA.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String[][] data;
-				try {
-					data = db.select(PLAYER_ENTRY, "PLAYER", null);
-					updateTable(data, PLAYER_ENTRY, "PLAYER");
-				} catch (SQLException e1) {
-					setErrorMessage(e1.getMessage());
-				}
-				table.setEnabled(true);
-			}
-		});
-		mnView.add(mntmA);
-		
-		JMenuItem mntmB = new JMenuItem("Champions");
-		mntmB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String[][] data;
-				try {
-					data = db.select(CHAMPION_ENTRY, "CHAMPION", null);
-					updateTable(data, CHAMPION_ENTRY, "CHAMPION");
-				} catch (SQLException e1) {
-					setErrorMessage(e1.getMessage());
-				}
-				table.setEnabled(true);
-			}
-		});		
-		mnView.add(mntmB);
-		
+		menuBar.add(mnReport);
+		menuBar.add(mnChampion);
+		menuBar.add(mnDelete);
+		menuBar.add(mnUpdate);
+
+		generateViewTable();
+		generateReportMenu();
+		generateChampionMenu();
+		generateDeleteMenu();
+		generateUpdateMenu();
 		
 		table = new JTable(model);
 		frame.getContentPane().add(table, BorderLayout.CENTER);
 		frame.getContentPane().add(new JScrollPane(table));
 		frame.getContentPane().add(lblT, BorderLayout.SOUTH);
+	}
+	
+	//Add menu for each table in views
+	private void generateViewTable() {
+		for (int i = 0; i < TABLE_NAMES.length; i++) {
+			final int index = i;
+			JMenuItem mntm = new JMenuItem(TABLE_NAMES[i]);
+			mntm.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String[][] data;
+					try {
+						//remove trailing null values 
+					    List<String> list = new ArrayList<String>(Arrays.asList(db.getEntries(TABLE_NAMES[index])));
+					    list.removeAll(Collections.singleton(null));
+					    String[] entries = list.toArray(new String[list.size()]);					
+					    data = db.select(entries, TABLE_NAMES[index], null);
+						updateTable(data, entries, TABLE_NAMES[index]);
+					} catch (SQLException e1) {
+						setErrorMessage(e1.getMessage());
+					}
+					table.setEnabled(true);
+				}
+			});		
+			mnView.add(mntm);			
+		}
+	}
+	
+	private void generateReportMenu() {
+		JMenuItem mntmReport = new JMenuItem("Report");
+		mnReport.add(mntmReport);
+		JMenuItem mntmCheckReport = new JMenuItem("Check reports");
+		mnReport.add(mntmCheckReport);
+		JMenuItem mntmReportedByAll = new JMenuItem("Reported by all (DIVISION)");
+		mnReport.add(mntmReportedByAll);
+		JMenuItem mntmReportAVG = new JMenuItem("Average report per player");
+		mnReport.add(mntmReportAVG);
+		JMenuItem mntmReportedAVG = new JMenuItem("Average level of most reported");
+		mnReport.add(mntmReportedAVG);
+		
+		mntmReport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});	
+		
+		mntmCheckReport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String[] reportInputName = {"REPORTERID", "REPORTERREGION"};
+				UserInput reportInput = new UserInput(2, reportInputName);
+				reportInput.setVisible(true);
+				
+				reportInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String[][] data;
+						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTEDID", "REPORTEDREGION"};
+						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTEDID, REPORTEDREGION FROM REPORT_A_PLAYER "
+								+ "WHERE REPORTEEID= '" + reportInput.textField[0].getText() +"' AND REPORTEEREGION= '"
+								+ reportInput.textField[1].getText() + "'";		
+								 
+						data = db.exactQuery(query, entry);
+						updateTable(data, entry, "REPORT_A_PLAYER");			
+						reportInput.dispose();
+					}
+				});	
+			}
+		});	
+		
+		mntmReportedByAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+//						String[][] data;
+//						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTEDID", "REPORTEDREGION"};
+//						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTEDID, REPORTEDREGION FROM REPORT_A_PLAYER "
+//								+ "WHERE REPORTEEID= '" + reportInput.textField[0].getText() +"' AND REPORTEEREGION= '"
+//								+ reportInput.textField[1].getText() + "'";		
+//								 
+//						data = db.exactQuery(query, entry);
+//						updateTable(data, entry, null);			
+			}
+		});	
+		
+		mntmReportAVG.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String [][] data;
+				String[] entry = {"AVG(TIMESREPORTED)"};
+				String query = "SELECT avg(TIMESREPORTED) from PLAYER";
+				data = db.exactQuery(query, entry);
+				updateTable(data, entry, null);		
+			}
+		});	
+		
+		mntmReportedAVG.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String [][] data;
+				String[] entry = {"AVG(PLAYERLEVEL)"};
+				String query = "SELECT avg(PLAYERLEVEL) FROM (SELECT PLAYERLEVEL FROM PLAYER WHERE "
+						+ "TIMESREPORTED = (SELECT MAX(TIMESREPORTED)FROM PLAYER))";
+				data = db.exactQuery(query, entry);
+				updateTable(data, entry, null);	
+			}
+		});	
+
+	}
+	
+	private void generateChampionMenu() {
+		JMenuItem mntmSkills = new JMenuItem("Skills");
+		mnChampion.add(mntmSkills);
+		JMenuItem mntmBought = new JMenuItem("Who bought (JOIN)");
+		mnChampion.add(mntmBought);
+		JMenuItem mntmMaxSkill = new JMenuItem("Max damage skill");
+		mnChampion.add(mntmMaxSkill);
+		JMenuItem mntmMostChampions = new JMenuItem("Players who purchased most champions");
+		mnChampion.add(mntmMostChampions);
+
+
+		mntmSkills.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String[] championInputName = {"PLAYERID", "PLAYERREGION", "CHAMPIONID"};
+				UserInput championInput = new UserInput(3, championInputName);
+				championInput.setVisible(true);
+				
+				championInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String[][] data;
+//						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTEDID", "REPORTEDREGION"};
+//						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTEDID, REPORTEDREGION FROM REPORT_A_PLAYER "
+//								+ "WHERE REPORTEEID= '" + reportInput.textField[0].getText() +"' AND REPORTEEREGION= '"
+//								+ reportInput.textField[1].getText() + "'";		
+//						SELECT s.Type, s.Description, s.Effect
+//						FROM Player_Purchase_Champion pc, Champion_Skills1 s
+//						WHERE pc.player_id = INPUT1 AND player_region = INPUT2 AND champion_id = INPUT3 AND s.championID = INPUT3
+//						data = db.exactQuery(query, entry);
+//						updateTable(data, entry, null);			
+						championInput.dispose();
+					}
+				});	
+			}
+		});	
+		
+		mntmBought.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String[] championInputName = {"CHAMPIONID"};
+				UserInput championInput = new UserInput(1, championInputName);
+				championInput.setVisible(true);
+				
+				championInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String[][] data;
+//						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTEDID", "REPORTEDREGION"};
+//						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTEDID, REPORTEDREGION FROM REPORT_A_PLAYER "
+//								+ "WHERE REPORTEEID= '" + reportInput.textField[0].getText() +"' AND REPORTEEREGION= '"
+//								+ reportInput.textField[1].getText() + "'";		
+//						SELECT p.Username, p.Region, p.accountStatus, p.division
+//						FROM Player p
+//						JOIN Player_Purchase_Champion c
+//						ON p.Username = c.playerID AND p.Region = c.playerRegion AND c.championID = INPUT1 
+//						data = db.exactQuery(query, entry);
+//						updateTable(data, entry, null);			
+						championInput.dispose();
+					}
+				});	
+			}
+		});		
+		
+		mntmMaxSkill.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+//				String [][] data;
+//				String[] entry = {"MAX(DAMAGE)"};
+//				String query = "SELECT *, max(DAMAGE) from CHAMPION_SKILLS2";
+//				data = db.exactQuery(query, entry);
+//				updateTable(data, entry, null);		
+			}
+		});	
+		
+		mntmMostChampions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+//				String [][] data;
+//				String[] entry = {"MAX(DAMAGE)"};
+//				String query = "SELECT *, max(DAMAGE) from CHAMPION_SKILLS2";
+//				data = db.exactQuery(query, entry);
+//				updateTable(data, entry, null);		
+			}
+		});	
+	}
+	
+	private void generateDeleteMenu() {
+		JMenuItem mntmChampion = new JMenuItem("Champion (CASCADE)");
+		mnDelete.add(mntmChampion);
+		JMenuItem mntmSkill = new JMenuItem("Skill (NOT CASCADE)");
+		mnDelete.add(mntmSkill);
+		
+		//CHECK integrity constraint ex: delete Ahri
+		mntmChampion.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String[] deleteInputName = {"CHAMPION NAME"};
+				UserInput deleteInput = new UserInput(1, deleteInputName);
+				deleteInput.setVisible(true);
+				
+				deleteInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String query = "DELETE FROM CHAMPION WHERE NAME= '" + deleteInput.textField[0].getText() + "'";
+						if (db.deletion(query)) {
+							lblT.setText("DELETE SUCCESFUL");
+							lblT.setForeground(Color.blue);
+						} else {
+							lblT.setText("DELETE UNSUCCESFUL");
+							lblT.setForeground(Color.red);
+						}
+						deleteInput.dispose();
+					}
+				});	
+			}
+		});	
+		
+		mntmSkill.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String[] deleteInputName = {"CHAMPION ID"};
+				UserInput deleteInput = new UserInput(1, deleteInputName);
+				deleteInput.setVisible(true);
+				
+				deleteInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String query = "DELETE FROM CHAMPION_SKILLS1 WHERE CHAMPIONID= '" + deleteInput.textField[0].getText() + "'";
+						if (db.deletion(query)) {
+							lblT.setText("DELETE SUCCESFUL");
+							lblT.setForeground(Color.blue);
+						} else {
+							lblT.setText("DELETE UNSUCCESFUL");
+							lblT.setForeground(Color.red);
+						}
+						deleteInput.dispose();
+					}
+				});	
+			}
+		});	
+	}
+	
+	private void generateUpdateMenu() {
+		JMenuItem mntmConstraint = new JMenuItem("Create level constraint");
+		mnUpdate.add(mntmConstraint);
+		JMenuItem mntmUpdate = new JMenuItem("Update level");
+		mnUpdate.add(mntmUpdate);
+		
+//		mntmConstraint.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				String[] updateInputName = {"CHAMPION ID"};
+//				UserInput updateInput = new UserInput(1, updateInputName);
+//				updateInput.setVisible(true);
+//				
+//				updateInput.btnGo.addActionListener(new ActionListener() {
+//					public void actionPerformed(ActionEvent e) {
+//						String query = "DELETE FROM CHAMPION_SKILLS1 WHERE CHAMPIONID= '" + updateInput.textField[0].getText() + "'";
+//						if (db.deletion(query)) {
+//							lblT.setText("DELETE SUCCESFUL");
+//							lblT.setForeground(Color.blue);
+//						} else {
+//							lblT.setText("DELETE UNSUCCESFUL");
+//							lblT.setForeground(Color.red);
+//						}
+//						deleteInput.dispose();
+//					}
+//				});	
+//			}
+//		});
+		
+		mntmUpdate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String[] updateInputName = {"LEVEL", "USERNAME", "REGION"};
+				UserInput deleteInput = new UserInput(3, updateInputName);
+				deleteInput.setVisible(true);
+				
+				deleteInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String query = "UPDATE PLAYER SET PLAYERLEVEL= '" + deleteInput.textField[0].getText() + "' WHERE USERNAME= '" 
+								+ deleteInput.textField[1].getText() + "' AND REGION= '" + deleteInput.textField[2].getText() + "'";
+						if (db.deletion(query)) {
+							lblT.setText("UPDATE SUCCESFUL");
+							lblT.setForeground(Color.blue);
+						} else {
+							lblT.setText("UPDATE UNSUCCESFUL");
+							lblT.setForeground(Color.red);
+						}
+						deleteInput.dispose();
+					}
+				});	
+			}
+		});
+		
 	}
 	
 	private void setErrorMessage(String error) {
@@ -216,7 +488,7 @@ public class GUI implements TableModelListener {
 						} catch (SQLException e1) {
 							setErrorMessage(e1.getMessage());
 						}
-						custom.setVisible(false);
+						custom.dispose();
 					}
 				});		
 			} else {

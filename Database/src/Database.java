@@ -47,12 +47,67 @@ public class Database {
 		return primaryKey;
 	}
 	
+	public String[] getEntries(String tableName) {
+		String[] entries = new String[32];
+		
+		try {
+			Statement stmt;
+			stmt = con.createStatement();							
+			ResultSet rs = stmt.executeQuery("SELECT * from " + tableName);
+			ResultSetMetaData rsmd = rs.getMetaData();	
+			int columnCount = rsmd.getColumnCount();
+			
+			for (int i = 1; i <= columnCount; i++ ) {
+				  entries[i - 1] = rsmd.getColumnName(i);
+			}
+			stmt.close();		
+		} catch(SQLException ex) {
+			System.err.println("SQLException: " + ex.getMessage());
+		}		
+		return entries;
+	}
+	
+	//gives the exact sql statement as query
+	public String[][] exactQuery(String query, String[] entry) {
+		String[][] data = new String[128][entry.length];
+		System.out.println(query);
+			
+		try {
+			Statement stmt;
+			stmt = con.createStatement();	
+			ResultSet rs = stmt.executeQuery(query);
+
+			for (int i = 0; rs.next(); i++) {
+				for (int j = 0; j < entry.length && entry[j] != null; j++) {
+					data[i][j] = rs.getString(entry[j]);
+				}
+			}
+		} catch(SQLException ex) {
+			System.err.println("SQLException: " + ex.getMessage());
+		}			
+		return data;
+	}
+	
+	public boolean deletion(String update) {
+		try {
+			Statement stmt;
+			stmt = con.createStatement();	
+
+			
+			return (stmt.executeUpdate(update) != 0);
+
+		} catch(SQLException ex) {
+			System.err.println("SQLException: " + ex.getMessage());
+			return false;
+		}
+	}
+	
 	public String[][] select(String[] entry, String tableName, String custom) throws SQLException {
-		String[][] data = new String[64][entry.length];
+		String[][] data = new String[128][entry.length];
 		Statement stmt;
 		String queryEntry = "";
 		
-		for (int i = 0; i < entry.length; i++) {
+		for (int i = 0; i < entry.length && entry[i] != null; i++) {
 			entry[i] = entry[i].trim().toUpperCase();
 			queryEntry += entry[i] + ", ";
 		}
@@ -67,7 +122,7 @@ public class Database {
 	
 		ResultSet rs = stmt.executeQuery(query);
 		for (int i = 0; rs.next(); i++) {
-			for (int j = 0; j < entry.length; j++) {
+			for (int j = 0; j < entry.length && entry[j] != null; j++) {
 				data[i][j] = rs.getString(entry[j]);
 			}
 		}

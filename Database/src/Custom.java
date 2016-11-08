@@ -15,7 +15,7 @@ public class Custom extends JFrame {
 	 JTextField textField_1;
 	 JTextField textField_2;
 	 final ButtonGroup buttonGroup = new ButtonGroup();
-	JButton btnNewButton = new JButton("Search"); 
+	 JButton btnNewButton = new JButton("Search"); 
 
 	public Custom() {
 		setBounds(100, 100, 450, 300);

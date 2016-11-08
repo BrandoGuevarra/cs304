@@ -67,9 +67,7 @@ public class Custom extends JFrame {
 		rdbtnNewRadioButton_3.setBounds(206, 111, 46, 23);
 		contentPane.add(rdbtnNewRadioButton_3);
 		
-		JLabel lblNewLabel_2 = new JLabel("New label");
-		lblNewLabel_2.setBounds(33, 156, 100, 14);
-		contentPane.add(lblNewLabel_2);
+	
 		
 		textField_2 = new JTextField();
 		textField_2.setBounds(177, 153, 217, 20);

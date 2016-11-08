@@ -29,7 +29,7 @@ public class GUI implements TableModelListener {
 
 	String[] TABLE_NAMES = {"PLAYER", "CHAMPION", "ITEM", "ITEM_UPGRADINTO_ITEM", "CHAMPION_SKILLS1", "CHAMPION_WIELD_ITEM",
 			"PURCHASE_AND_UPGRADE", "REPORT_A_PLAYER"};
-	Database db = new Database();
+	static Database db = new Database();
 	JFrame frame;
 	DefaultTableModel model = null;
 	JTable table;
@@ -43,14 +43,19 @@ public class GUI implements TableModelListener {
 	JMenu mnDelete = new JMenu("Delete");
 	JMenu mnUpdate = new JMenu("Update");
 	JLabel lblT = new JLabel("Messages");
+	static String accountStatus = "offline";
+	static String username;
+	static String region;
+
 
 	public static void main(String[] args) {
 		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUI window = new GUI();
-					window.frame.setVisible(true);
+					login();
+//					GUI window = new GUI();
+//					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -156,14 +161,15 @@ public class GUI implements TableModelListener {
 		
 		mntmReportedByAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//						String[][] data;
-//						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTEDID", "REPORTEDREGION"};
-//						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTEDID, REPORTEDREGION FROM REPORT_A_PLAYER "
-//								+ "WHERE REPORTEEID= '" + reportInput.textField[0].getText() +"' AND REPORTEEREGION= '"
-//								+ reportInput.textField[1].getText() + "'";		
-//								 
-//						data = db.exactQuery(query, entry);
-//						updateTable(data, entry, null);			
+					String[][] data;
+					String[] entry = {"USERNAME", "REGION", "PASSWORD", "PLAYERLEVEL", "TIMESREPORTED", "RIOTPOINTS"
+							, "IPPOINTS", "DIVISION", "ACCOUNTSTATUS"};
+					String query = "SELECT * FROM PLAYER p WHERE NOT EXISTS(SELECT p1.USERNAME, p1.REGION FROM PLAYER p1"
+							+ " MINUS SELECT r.REPORTEDID, r.REPORTEDREGION FROM REPORT_A_PLAYER r "
+							+ "WHERE r.REPORTEEID = p.USERNAME AND r.REPORTEEREGION = p.REGION)";		
+								 
+					data = db.exactQuery(query, entry);
+					updateTable(data, entry, null);			
 			}
 		});	
 		
@@ -252,7 +258,7 @@ public class GUI implements TableModelListener {
 		
 		mntmMaxSkill.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				String [][] data;
+				String [][] data;
 //				String[] entry = {"MAX(DAMAGE)"};
 //				String query = "SELECT *, max(DAMAGE) from CHAMPION_SKILLS2";
 //				data = db.exactQuery(query, entry);
@@ -324,33 +330,9 @@ public class GUI implements TableModelListener {
 	}
 	
 	private void generateUpdateMenu() {
-		JMenuItem mntmConstraint = new JMenuItem("Create level constraint");
-		mnUpdate.add(mntmConstraint);
 		JMenuItem mntmUpdate = new JMenuItem("Update level");
 		mnUpdate.add(mntmUpdate);
-		
-//		mntmConstraint.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				String[] updateInputName = {"CHAMPION ID"};
-//				UserInput updateInput = new UserInput(1, updateInputName);
-//				updateInput.setVisible(true);
-//				
-//				updateInput.btnGo.addActionListener(new ActionListener() {
-//					public void actionPerformed(ActionEvent e) {
-//						String query = "DELETE FROM CHAMPION_SKILLS1 WHERE CHAMPIONID= '" + updateInput.textField[0].getText() + "'";
-//						if (db.deletion(query)) {
-//							lblT.setText("DELETE SUCCESFUL");
-//							lblT.setForeground(Color.blue);
-//						} else {
-//							lblT.setText("DELETE UNSUCCESFUL");
-//							lblT.setForeground(Color.red);
-//						}
-//						deleteInput.dispose();
-//					}
-//				});	
-//			}
-//		});
-		
+			
 		mntmUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] updateInputName = {"LEVEL", "USERNAME", "REGION"};
@@ -376,6 +358,39 @@ public class GUI implements TableModelListener {
 		
 	}
 	
+	
+	private static void login() {
+		Login login = new Login();
+		login.setVisible(true);
+		login.btnLogin.addActionListener(new ActionListener() {
+		
+			public void actionPerformed(ActionEvent e) {
+				if (login.textField.getText().equals("admin") && login.passwordField.getText().equals("admin")) {
+					accountStatus = "admin";
+					login.dispose();
+					GUI window = new GUI();
+					window.frame.setVisible(true);
+				}
+				String query = "SELECT USERNAME FROM PLAYER WHERE USERNAME= '" + login.textField.getText() + "' AND REGION= '"
+						+ login.buttonGroup.getSelection().getActionCommand() + "' AND PASSWORD= '" + login.passwordField.getText() + "'";
+				String[] entry = {"USERNAME"};
+				String[][] data = db.exactQuery(query, entry);
+				if (data[0][0] != null ) {
+					accountStatus = "online";
+					username = login.textField.getText();
+					region = login.buttonGroup.getSelection().getActionCommand();
+					login.dispose();
+					GUI window = new GUI();
+					window.frame.setVisible(true);
+				} else {
+					login.label.setText("Login unsuccesful");
+			    	login.label.setForeground(Color.red);
+				}
+
+			}
+		});	
+		
+	}
 	private void setErrorMessage(String error) {
 		errorMessage = error;
     	lblT.setText(errorMessage);

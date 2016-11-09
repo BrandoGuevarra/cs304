@@ -18,16 +18,20 @@ import javax.swing.JLabel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 
 public class GUI implements TableModelListener {
 
-	String[] TABLE_NAMES = {"PLAYER", "CHAMPION", "ITEM", "ITEM_UPGRADINTO_ITEM", "CHAMPION_SKILLS1", "CHAMPION_WIELD_ITEM",
+	String[] TABLE_NAMES = {"PLAYER", "CHAMPION", "ITEM", "ITEM_UPGRADEINTO_ITEM", "CHAMPION_SKILLS1", "CHAMPION_SKILLS2",
+			"CHAMPION_WIELD_ITEM", "CHAMPION_STATS1", "CHAMPION_STATS2", "PLAYER_PURCHASE_CHAMPION",
 			"PURCHASE_AND_UPGRADE", "REPORT_A_PLAYER"};
 	static Database db = new Database();
 	JFrame frame;
@@ -42,6 +46,7 @@ public class GUI implements TableModelListener {
 	JMenu mnChampion = new JMenu("Champion");
 	JMenu mnDelete = new JMenu("Delete");
 	JMenu mnUpdate = new JMenu("Update");
+	JMenu mnAdmin = new JMenu("Admin");
 	JLabel lblT = new JLabel("Messages");
 	static String accountStatus = "offline";
 	static String username;
@@ -87,6 +92,10 @@ public class GUI implements TableModelListener {
 		generateChampionMenu();
 		generateDeleteMenu();
 		generateUpdateMenu();
+		if (accountStatus.equals("admin")) {
+			menuBar.add(mnAdmin);
+			generateAdminMenu();
+		}
 		
 		table = new JTable(model);
 		frame.getContentPane().add(table, BorderLayout.CENTER);
@@ -103,10 +112,7 @@ public class GUI implements TableModelListener {
 				public void actionPerformed(ActionEvent e) {
 					String[][] data;
 					try {
-						//remove trailing null values 
-					    List<String> list = new ArrayList<String>(Arrays.asList(db.getEntries(TABLE_NAMES[index])));
-					    list.removeAll(Collections.singleton(null));
-					    String[] entries = list.toArray(new String[list.size()]);					
+					    String[] entries = db.getEntries(TABLE_NAMES[index]);			
 					    data = db.select(entries, TABLE_NAMES[index], null);
 						updateTable(data, entries, TABLE_NAMES[index]);
 					} catch (SQLException e1) {
@@ -120,8 +126,7 @@ public class GUI implements TableModelListener {
 	}
 	
 	private void generateReportMenu() {
-		JMenuItem mntmReport = new JMenuItem("Report");
-		mnReport.add(mntmReport);
+
 		JMenuItem mntmCheckReport = new JMenuItem("Check reports");
 		mnReport.add(mntmCheckReport);
 		JMenuItem mntmReportedByAll = new JMenuItem("Reported by all (DIVISION)");
@@ -131,26 +136,57 @@ public class GUI implements TableModelListener {
 		JMenuItem mntmReportedAVG = new JMenuItem("Average level of most reported");
 		mnReport.add(mntmReportedAVG);
 		
-		mntmReport.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-			}
-		});	
+		
+		if (accountStatus.equals("online")) {
+			JMenuItem mntmReport = new JMenuItem("Report");
+			mnReport.add(mntmReport);
+		
+			mntmReport.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String[] reportInputName = {"REPORTEEID", "REPORTEEREGION", "OFFENDINGACTION"};
+					UserInput reportInput = new UserInput(reportInputName);
+					reportInput.setVisible(true);
+					
+					reportInput.btnGo.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							DateFormat df = new SimpleDateFormat("HHddMMyy");
+							Date dateobj = new Date();
+							String update = "INSERT INTO REPORT_A_PLAYER VALUES ('" + db.getColumnCount("REPORT_A_PLAYER")
+								+ "', '" + username + "', '" + region + "', '" + reportInput.textField[0].getText() + "', '" 
+								+ reportInput.textField[1].getText() + "', '" + df.format(dateobj) + "', '"  
+								+ reportInput.textField[2].getText() + "')";		
+									 
+							System.out.print(update);
+							if (db.deletion(update)) {
+								lblT.setText("REPORT SUCCESFUL");
+								lblT.setForeground(Color.blue);
+							} else {
+								lblT.setText("REPORT UNSUCCESFUL");
+								lblT.setForeground(Color.red);
+							}
+							reportInput.dispose();
+						}
+					});	
+				}
+			});	
+		}
 		
 		mntmCheckReport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] reportInputName = {"REPORTERID", "REPORTERREGION"};
-				UserInput reportInput = new UserInput(2, reportInputName);
+				UserInput reportInput = new UserInput(reportInputName);
+				reportInput.textField[0].setText(username);
+				reportInput.textField[1].setText(region);
 				reportInput.setVisible(true);
-				
+					
 				reportInput.btnGo.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String[][] data;
-						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTEDID", "REPORTEDREGION"};
-						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTEDID, REPORTEDREGION FROM REPORT_A_PLAYER "
-								+ "WHERE REPORTEEID= '" + reportInput.textField[0].getText() +"' AND REPORTEEREGION= '"
+						String[] entry = {"REPORTID", "REPORTERID", "REPORTERREGION", "REPORTEDTIMEDAYMONTHYEAR", "OFFENDINGACTION"};
+						String query = "SELECT REPORTID, REPORTERID, REPORTERREGION, REPORTEDTIMEDAYMONTHYEAR, OFFENDINGACTION FROM REPORT_A_PLAYER "
+								+ "WHERE REPORTERID= '" + reportInput.textField[0].getText() +"' AND REPORTERREGION= '"
 								+ reportInput.textField[1].getText() + "'";		
-								 
+									 
 						data = db.exactQuery(query, entry);
 						updateTable(data, entry, "REPORT_A_PLAYER");			
 						reportInput.dispose();
@@ -165,7 +201,7 @@ public class GUI implements TableModelListener {
 					String[] entry = {"USERNAME", "REGION", "PASSWORD", "PLAYERLEVEL", "TIMESREPORTED", "RIOTPOINTS"
 							, "IPPOINTS", "DIVISION", "ACCOUNTSTATUS"};
 					String query = "SELECT * FROM PLAYER p WHERE NOT EXISTS(SELECT p1.USERNAME, p1.REGION FROM PLAYER p1"
-							+ " MINUS SELECT r.REPORTEDID, r.REPORTEDREGION FROM REPORT_A_PLAYER r "
+							+ " MINUS SELECT r.REPORTERID, r.REPORTERREGION FROM REPORT_A_PLAYER r "
 							+ "WHERE r.REPORTEEID = p.USERNAME AND r.REPORTEEREGION = p.REGION)";		
 								 
 					data = db.exactQuery(query, entry);
@@ -210,22 +246,25 @@ public class GUI implements TableModelListener {
 		mntmSkills.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] championInputName = {"PLAYERID", "PLAYERREGION", "CHAMPIONID"};
-				UserInput championInput = new UserInput(3, championInputName);
+				UserInput championInput = new UserInput(championInputName);
+				championInput.textField[0].setText(username);
+				championInput.textField[1].setText(region);
+
 				championInput.setVisible(true);
 				
 				championInput.btnGo.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String[][] data;
-//						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTEDID", "REPORTEDREGION"};
-//						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTEDID, REPORTEDREGION FROM REPORT_A_PLAYER "
-//								+ "WHERE REPORTEEID= '" + reportInput.textField[0].getText() +"' AND REPORTEEREGION= '"
-//								+ reportInput.textField[1].getText() + "'";		
-//						SELECT s.Type, s.Description, s.Effect
-//						FROM Player_Purchase_Champion pc, Champion_Skills1 s
-//						WHERE pc.player_id = INPUT1 AND player_region = INPUT2 AND champion_id = INPUT3 AND s.championID = INPUT3
-//						data = db.exactQuery(query, entry);
-//						updateTable(data, entry, null);			
+						String[] entry = {"TYPE", "DESCRIPTION", "EFFECT"};
+						String query = "SELECT s.TYPE, s.DESCRIPTION, s.EFFECT FROM PLAYER_PURCHASE_CHAMPION pc, CHAMPION_SKILLS1 s "
+								+ "WHERE pc.PLAYERID= '" + championInput.textField[0].getText() + "' AND pc.PLAYERREGION= '"
+								+ championInput.textField[1].getText() + "' AND pc.CHAMPIONID= '" + championInput.textField[2].getText()
+								+ "' AND s.CHAMPIONID= '" + championInput.textField[2].getText() + "'";	
+
+						data = db.exactQuery(query, entry);
+						updateTable(data, entry, null);			
 						championInput.dispose();
+
 					}
 				});	
 			}
@@ -234,22 +273,18 @@ public class GUI implements TableModelListener {
 		mntmBought.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] championInputName = {"CHAMPIONID"};
-				UserInput championInput = new UserInput(1, championInputName);
+				UserInput championInput = new UserInput(championInputName);
 				championInput.setVisible(true);
 				
 				championInput.btnGo.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String[][] data;
-//						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTEDID", "REPORTEDREGION"};
-//						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTEDID, REPORTEDREGION FROM REPORT_A_PLAYER "
-//								+ "WHERE REPORTEEID= '" + reportInput.textField[0].getText() +"' AND REPORTEEREGION= '"
-//								+ reportInput.textField[1].getText() + "'";		
-//						SELECT p.Username, p.Region, p.accountStatus, p.division
-//						FROM Player p
-//						JOIN Player_Purchase_Champion c
-//						ON p.Username = c.playerID AND p.Region = c.playerRegion AND c.championID = INPUT1 
-//						data = db.exactQuery(query, entry);
-//						updateTable(data, entry, null);			
+						String[] entry = {"USERNAME", "REGION", "ACCOUNTSTATUS", "DIVISION"};
+						String query = "SELECT p.USERNAME, p.REGION, p.ACCOUNTSTATUS, p.DIVISION FROM PLAYER p "
+								+ "JOIN PLAYER_PURCHASE_CHAMPION c ON p.USERNAME= c.PLAYERID AND p.REGION = c.PLAYERID AND"
+								+ " CHAMPIONID= '" + championInput.textField[0].getText() + "'"; 
+						data = db.exactQuery(query, entry);
+						updateTable(data, entry, null);			
 						championInput.dispose();
 					}
 				});	
@@ -259,20 +294,32 @@ public class GUI implements TableModelListener {
 		mntmMaxSkill.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String [][] data;
-//				String[] entry = {"MAX(DAMAGE)"};
-//				String query = "SELECT *, max(DAMAGE) from CHAMPION_SKILLS2";
-//				data = db.exactQuery(query, entry);
-//				updateTable(data, entry, null);		
+				String[] entry = {"MAX(DAMAGE)"};
+				String query = "SELECT max(DAMAGE) from CHAMPION_SKILLS2";
+				data = db.exactQuery(query, entry);
+				updateTable(data, entry, null);		
 			}
 		});	
 		
+		//NOT SURE
 		mntmMostChampions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				String [][] data;
-//				String[] entry = {"MAX(DAMAGE)"};
-//				String query = "SELECT *, max(DAMAGE) from CHAMPION_SKILLS2";
-//				data = db.exactQuery(query, entry);
-//				updateTable(data, entry, null);		
+				String[] championInputName = {"CHAMPIONID"};
+				UserInput championInput = new UserInput(championInputName);
+				championInput.setVisible(true);
+				
+				championInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String[][] data;
+						String[] entry = {"USRNAME", "REGION", "ACCOUNTSTATUS", "DIVISION"};
+						String query = "SELECT p.USERNAME, p.REGION, p.ACCOUNTSTATUS, p.DIVISION FROM PLAYER p "
+								+ "JOIN PLAYER_PURCHASE_CHAMPION c ON p.USERNAME= c.PLAYERID AND p.REGION = c.PLAYERID AND"
+								+ " CHAMPIONID= '" + championInput.textField[0].getText() + "'"; 
+						data = db.exactQuery(query, entry);
+						updateTable(data, entry, null);			
+						championInput.dispose();
+					}
+				});	
 			}
 		});	
 	}
@@ -280,14 +327,14 @@ public class GUI implements TableModelListener {
 	private void generateDeleteMenu() {
 		JMenuItem mntmChampion = new JMenuItem("Champion (CASCADE)");
 		mnDelete.add(mntmChampion);
-		JMenuItem mntmSkill = new JMenuItem("Skill (NOT CASCADE)");
+		JMenuItem mntmSkill = new JMenuItem("Skills1 (NOT CASCADE)");
 		mnDelete.add(mntmSkill);
 		
 		//CHECK integrity constraint ex: delete Ahri
 		mntmChampion.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] deleteInputName = {"CHAMPION NAME"};
-				UserInput deleteInput = new UserInput(1, deleteInputName);
+				UserInput deleteInput = new UserInput(deleteInputName);
 				deleteInput.setVisible(true);
 				
 				deleteInput.btnGo.addActionListener(new ActionListener() {
@@ -309,7 +356,7 @@ public class GUI implements TableModelListener {
 		mntmSkill.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] deleteInputName = {"CHAMPION ID"};
-				UserInput deleteInput = new UserInput(1, deleteInputName);
+				UserInput deleteInput = new UserInput(deleteInputName);
 				deleteInput.setVisible(true);
 				
 				deleteInput.btnGo.addActionListener(new ActionListener() {
@@ -336,7 +383,7 @@ public class GUI implements TableModelListener {
 		mntmUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] updateInputName = {"LEVEL", "USERNAME", "REGION"};
-				UserInput deleteInput = new UserInput(3, updateInputName);
+				UserInput deleteInput = new UserInput(updateInputName);
 				deleteInput.setVisible(true);
 				
 				deleteInput.btnGo.addActionListener(new ActionListener() {
@@ -358,12 +405,53 @@ public class GUI implements TableModelListener {
 		
 	}
 	
+	private void generateAdminMenu() {
+		JMenuItem mntmAllReport = new JMenuItem("All reports");
+		mnAdmin.add(mntmAllReport);
+		JMenuItem mntmUpdateStatus = new JMenuItem("Update Player status");
+		mnAdmin.add(mntmUpdateStatus);
+		
+		mntmAllReport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String [][] data;
+				String[] entry = db.getEntries("REPORT_A_PLAYER");
+				String query = "SELECT * from REPORT_A_PLAYER";
+				data = db.exactQuery(query, entry);
+				updateTable(data, entry, null);		
+			}
+		});	
+		
+		mntmUpdateStatus.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String[] adminInputName = {"STATUS", "USERNAME", "REGION"};
+				UserInput adminInput = new UserInput(adminInputName);
+				adminInput.setVisible(true);
+				
+				adminInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String query = "UPDATE PLAYER SET ACCOUNTSTATUS= '" + adminInput.textField[0].getText() + "' WHERE USERNAME= '" 
+								+ adminInput.textField[1].getText() + "' AND REGION= '" + adminInput.textField[2].getText() + "'";
+						if (db.deletion(query)) {
+							lblT.setText("UPDATE SUCCESFUL");
+							lblT.setForeground(Color.blue);
+						} else {
+							lblT.setText("UPDATE UNSUCCESFUL");
+							lblT.setForeground(Color.red);
+						}
+						adminInput.dispose();
+					}
+				});	
+			}
+		});
+	}
+	
 	
 	private static void login() {
 		Login login = new Login();
 		login.setVisible(true);
 		login.btnLogin.addActionListener(new ActionListener() {
 		
+			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e) {
 				if (login.textField.getText().equals("admin") && login.passwordField.getText().equals("admin")) {
 					accountStatus = "admin";
@@ -391,6 +479,7 @@ public class GUI implements TableModelListener {
 		});	
 		
 	}
+
 	private void setErrorMessage(String error) {
 		errorMessage = error;
     	lblT.setText(errorMessage);

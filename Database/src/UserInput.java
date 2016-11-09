@@ -18,7 +18,7 @@ public class UserInput extends JFrame {
 
 
 
-	public UserInput(int numInputs, String[] inputNames) {
+	public UserInput(String[] inputNames) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -42,7 +42,7 @@ public class UserInput extends JFrame {
 				FormSpecs.DEFAULT_ROWSPEC,}));
 		
 		contentPane.add(btnGo, "2, 2");
-		for (int i = 0; i < numInputs; i++) {
+		for (int i = 0; i < inputNames.length; i++) {
 			JLabel lblNewLabel = new JLabel(inputNames[i]);
 			contentPane.add(lblNewLabel, "2, " + (4 + i * 2)  + ", right, default");
 			textField[i] = new JTextField();

@@ -1,4 +1,8 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
      
 public class Database {
 	
@@ -47,6 +51,24 @@ public class Database {
 		return primaryKey;
 	}
 	
+	public int getColumnCount(String tableName) {
+		int col = 0;
+		try {
+			Statement stmt;
+			stmt = con.createStatement();							
+			ResultSet rs = stmt.executeQuery("SELECT * from " + tableName);
+			ResultSetMetaData rsmd = rs.getMetaData();	
+			col = rsmd.getColumnCount();
+
+			stmt.close();		
+		} catch(SQLException ex) {
+			System.err.println("SQLException: " + ex.getMessage());
+		}		
+		
+		return col;
+	}
+	
+	
 	public String[] getEntries(String tableName) {
 		String[] entries = new String[32];
 		
@@ -64,7 +86,11 @@ public class Database {
 		} catch(SQLException ex) {
 			System.err.println("SQLException: " + ex.getMessage());
 		}		
-		return entries;
+		
+		//remove trailing null values 
+	    List<String> list = new ArrayList<String>(Arrays.asList(entries));
+	    list.removeAll(Collections.singleton(null));
+	    return list.toArray(new String[list.size()]);
 	}
 	
 	//gives the exact sql statement as query

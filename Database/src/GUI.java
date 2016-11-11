@@ -116,7 +116,8 @@ public class GUI implements TableModelListener {
 					    data = db.select(entries, TABLE_NAMES[index], null);
 						updateTable(data, entries, TABLE_NAMES[index]);
 					} catch (SQLException e1) {
-						setErrorMessage(e1.getMessage());
+//						setErrorMessage(e1.getMessage());
+						lblT.setText("Search not valid");
 					}
 					table.setEnabled(true);
 				}
@@ -482,8 +483,9 @@ public class GUI implements TableModelListener {
 
 	private void setErrorMessage(String error) {
 		errorMessage = error;
-    	lblT.setText(errorMessage);
-    	lblT.setForeground(Color.red);
+//    	lblT.setText(errorMessage);
+//    	lblT.setForeground(Color.red);
+		System.out.println("SQL Error: " +  error);
 	}
 	
 	private void updateTable(String[][] data, String[] entry, String tableName) {
@@ -536,7 +538,7 @@ public class GUI implements TableModelListener {
 			}
 		} catch (SQLException e1) {
 			setErrorMessage(e1.getMessage());
-			lblT.setText("UPDATE UNSUCCESFUL " + errorMessage);
+			lblT.setText("UPDATE UNSUCCESFUL");
 		}
 
 	}
@@ -602,7 +604,8 @@ public class GUI implements TableModelListener {
 					data = db.select(entry, currentTableName, null);
 					updateTable(data, entry, currentTableName);
 				} catch (SQLException e1) {
-					setErrorMessage(e1.getMessage());
+//					setErrorMessage(e1.getMessage());
+					lblT.setText("Search not valid");
 				}
 			}
 		}

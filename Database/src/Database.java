@@ -68,6 +68,24 @@ public class Database {
 		return col;
 	}
 	
+	public int getRowCount(String tableName) {
+		int row = 0;
+		try {
+			Statement stmt;
+			stmt = con.createStatement();							
+			ResultSet rs = stmt.executeQuery("SELECT * from " + tableName);
+			while (rs.next()) {
+				++row;
+			}
+
+			stmt.close();		
+		} catch(SQLException ex) {
+			System.err.println("SQLException: " + ex.getMessage());
+		}		
+		
+		return row;
+	}
+	
 	
 	public String[] getEntries(String tableName) {
 		String[] entries = new String[32];
@@ -93,6 +111,25 @@ public class Database {
 	    return list.toArray(new String[list.size()]);
 	}
 	
+	public String getValue(String tableName, String primaryKeyName, String primaryKey, String valueName) {
+		String value = "";
+		
+		try {
+			Statement stmt;
+			stmt = con.createStatement();							
+			ResultSet rs = stmt.executeQuery("SELECT * from " + tableName);
+			
+			while(rs.next()) {
+				if (rs.getString(primaryKeyName).equals(primaryKey)) {
+					return rs.getString(valueName);
+				}
+			}
+		} catch(SQLException ex) {
+			System.err.println("SQLException: " + ex.getMessage());
+		}	
+		
+		return value;
+	}
 	//gives the exact sql statement as query
 	public String[][] exactQuery(String query, String[] entry) {
 		String[][] data = new String[128][entry.length];
@@ -172,4 +209,6 @@ public class Database {
 		stmt.close();
 		return isUpdated;
 	}
+
+
 }

@@ -17,14 +17,11 @@ import java.awt.Color;
 import javax.swing.JLabel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 
@@ -74,7 +71,7 @@ public class GUI implements TableModelListener {
 
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 800, 550);
+		frame.setBounds(100, 100, 1000, 550);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -84,20 +81,31 @@ public class GUI implements TableModelListener {
 		menuBar.add(mnSelect);
 		menuBar.add(mnReport);
 		menuBar.add(mnChampion);
-		menuBar.add(mnDelete);
-		menuBar.add(mnUpdate);
+
 
 		generateViewTable();
 		generateReportMenu();
 		generateChampionMenu();
-		generateDeleteMenu();
-		generateUpdateMenu();
+
 		if (accountStatus.equals("admin")) {
 			menuBar.add(mnAdmin);
+			menuBar.add(mnDelete);
+			menuBar.add(mnUpdate);
 			generateAdminMenu();
+			generateDeleteMenu();
+			generateUpdateMenu();
 		}
 		
-		table = new JTable(model);
+		table = new JTable(model) {
+			public String getToolTipText(MouseEvent e) {
+				String tip = null;
+				 java.awt.Point p = e.getPoint();
+	             int row = rowAtPoint(p);
+	             int col = columnAtPoint(p);
+	             tip = (String) model.getValueAt(row, col);
+				return tip;
+			}
+		};
 		frame.getContentPane().add(table, BorderLayout.CENTER);
 		frame.getContentPane().add(new JScrollPane(table));
 		frame.getContentPane().add(lblT, BorderLayout.SOUTH);
@@ -107,22 +115,28 @@ public class GUI implements TableModelListener {
 	private void generateViewTable() {
 		for (int i = 0; i < TABLE_NAMES.length; i++) {
 			final int index = i;
-			JMenuItem mntm = new JMenuItem(TABLE_NAMES[i]);
-			mntm.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					String[][] data;
-					try {
-					    String[] entries = db.getEntries(TABLE_NAMES[index]);			
-					    data = db.select(entries, TABLE_NAMES[index], null);
-						updateTable(data, entries, TABLE_NAMES[index]);
-					} catch (SQLException e1) {
-//						setErrorMessage(e1.getMessage());
-						lblT.setText("Search not valid");
+			//Skip any admin only VIEW menu options
+			if (!(accountStatus.equals("online") && (TABLE_NAMES[i].equals("PLAYER") || TABLE_NAMES[i].equals("REPORT_A_PLAYER")))) {
+
+				JMenuItem mntm = new JMenuItem(TABLE_NAMES[i]);
+				mntm.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String[][] data;
+						try {
+						    String[] entries = db.getEntries(TABLE_NAMES[index]);			
+						    data = db.select(entries, TABLE_NAMES[index], null);
+							updateTable(data, entries, TABLE_NAMES[index]);
+						} catch (SQLException e1) {
+	//						setErrorMessage(e1.getMessage());
+							lblT.setText("Search not valid");
+						}
+						if (accountStatus.equals("admin")) {
+							table.setEnabled(true);
+						}
 					}
-					table.setEnabled(true);
-				}
-			});		
-			mnView.add(mntm);			
+				});		
+				mnView.add(mntm);	
+			}
 		}
 	}
 	
@@ -130,14 +144,17 @@ public class GUI implements TableModelListener {
 
 		JMenuItem mntmCheckReport = new JMenuItem("Check reports");
 		mnReport.add(mntmCheckReport);
+		
 		JMenuItem mntmReportedByAll = new JMenuItem("Reported by all (DIVISION)");
 		mnReport.add(mntmReportedByAll);
+		
 		JMenuItem mntmReportAVG = new JMenuItem("Average report per player");
 		mnReport.add(mntmReportAVG);
+		
 		JMenuItem mntmReportedAVG = new JMenuItem("Average level of most reported");
 		mnReport.add(mntmReportedAVG);
-		
-		
+		mnReport.setToolTipText("Of the players with the most reports what is their average level");
+				
 		if (accountStatus.equals("online")) {
 			JMenuItem mntmReport = new JMenuItem("Report");
 			mnReport.add(mntmReport);
@@ -152,13 +169,16 @@ public class GUI implements TableModelListener {
 						public void actionPerformed(ActionEvent e) {
 							DateFormat df = new SimpleDateFormat("HHddMMyy");
 							Date dateobj = new Date();
-							String update = "INSERT INTO REPORT_A_PLAYER VALUES ('" + db.getColumnCount("REPORT_A_PLAYER")
-								+ "', '" + username + "', '" + region + "', '" + reportInput.textField[0].getText() + "', '" 
-								+ reportInput.textField[1].getText() + "', '" + df.format(dateobj) + "', '"  
+							String update = "INSERT INTO REPORT_A_PLAYER VALUES ('" + (db.getRowCount("REPORT_A_PLAYER") + 1)
+								+ "', '" + reportInput.textField[0].getText() + "', '" + reportInput.textField[1].getText() + "', '" + username + "', '" 
+								+ region + "', '" + df.format(dateobj) + "', '"  
 								+ reportInput.textField[2].getText() + "')";		
 									 
 							System.out.print(update);
 							if (db.deletion(update)) {
+								db.deletion("UPDATE PLAYER SET TIMESREPORTED = TIMESREPORTED + 1 WHERE USERNAME = '"
+										+ reportInput.textField[0].getText() + "' AND REGION = '"
+										+ reportInput.textField[1].getText() + "'");
 								lblT.setText("REPORT SUCCESFUL");
 								lblT.setForeground(Color.blue);
 							} else {
@@ -183,8 +203,8 @@ public class GUI implements TableModelListener {
 				reportInput.btnGo.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String[][] data;
-						String[] entry = {"REPORTID", "REPORTERID", "REPORTERREGION", "REPORTEDTIMEDAYMONTHYEAR", "OFFENDINGACTION"};
-						String query = "SELECT REPORTID, REPORTERID, REPORTERREGION, REPORTEDTIMEDAYMONTHYEAR, OFFENDINGACTION FROM REPORT_A_PLAYER "
+						String[] entry = {"REPORTID", "REPORTEEID", "REPORTEEREGION", "REPORTERID", "REPORTERREGION", "REPORTEDTIMEDAYMONTHYEAR", "OFFENDINGACTION"};
+						String query = "SELECT REPORTID, REPORTEEID, REPORTEEREGION, REPORTERID, REPORTERREGION, REPORTEDTIMEDAYMONTHYEAR, OFFENDINGACTION FROM REPORT_A_PLAYER "
 								+ "WHERE REPORTERID= '" + reportInput.textField[0].getText() +"' AND REPORTERREGION= '"
 								+ reportInput.textField[1].getText() + "'";		
 									 
@@ -234,15 +254,48 @@ public class GUI implements TableModelListener {
 	}
 	
 	private void generateChampionMenu() {
+		JMenuItem mntmPurchase = new JMenuItem("Purchase");
+		mnChampion.add(mntmPurchase);
+		
 		JMenuItem mntmSkills = new JMenuItem("Skills");
 		mnChampion.add(mntmSkills);
+		
 		JMenuItem mntmBought = new JMenuItem("Who bought (JOIN)");
 		mnChampion.add(mntmBought);
+		mntmBought.setToolTipText("List all the players who bought a certain champion");
+
 		JMenuItem mntmMaxSkill = new JMenuItem("Max damage skill");
 		mnChampion.add(mntmMaxSkill);
+		mntmMaxSkill.setToolTipText("The highest damage skill");
+		
 		JMenuItem mntmMostChampions = new JMenuItem("Players who purchased most champions");
 		mnChampion.add(mntmMostChampions);
+		
+		mntmPurchase.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String[] championInputName = {"CHAMPION NAME"};
+				UserInput championInput = new UserInput(championInputName);
+				championInput.setVisible(true);
+				
+				championInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String cost = db.getValue("CHAMPION", "NAME", championInput.textField[0].getText(), "IPCOST");
+						String insert = "INSERT INTO PLAYER_PURCHASE_CHAMPION VALUES ('" + username + "', '" + region
+								+ "', '" + championInput.textField[0].getText() + "', '" + cost + "', 'IP')";
+						System.out.println(insert);
+						if (db.deletion(insert)) {
+							lblT.setText("PURCHASE SUCCESFUL");
+							lblT.setForeground(Color.blue);
+						} else {
+							lblT.setText("PURCHASE UNSUCCESFUL");
+							lblT.setForeground(Color.red);
+						}
+						championInput.dispose();
 
+					}
+				});	
+			}
+		});
 
 		mntmSkills.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -282,8 +335,8 @@ public class GUI implements TableModelListener {
 						String[][] data;
 						String[] entry = {"USERNAME", "REGION", "ACCOUNTSTATUS", "DIVISION"};
 						String query = "SELECT p.USERNAME, p.REGION, p.ACCOUNTSTATUS, p.DIVISION FROM PLAYER p "
-								+ "JOIN PLAYER_PURCHASE_CHAMPION c ON p.USERNAME= c.PLAYERID AND p.REGION = c.PLAYERID AND"
-								+ " CHAMPIONID= '" + championInput.textField[0].getText() + "'"; 
+								+ "JOIN PLAYER_PURCHASE_CHAMPION c ON p.USERNAME= c.PLAYERID AND p.REGION = c.PLAYERREGION AND"
+								+ " c.CHAMPIONID= '" + championInput.textField[0].getText() + "'"; 
 						data = db.exactQuery(query, entry);
 						updateTable(data, entry, null);			
 						championInput.dispose();
@@ -500,6 +553,8 @@ public class GUI implements TableModelListener {
 		table.setEnabled(false);
 	}
 	
+	
+	
 	//an entry in the table is changed
 	public void tableChanged(TableModelEvent e) {
         int row = e.getFirstRow();
@@ -529,7 +584,9 @@ public class GUI implements TableModelListener {
 			if (db.update(this.currentTableName, columnName, data, primaryKey, pkValue)) {
 				String[][] newData = db.select(this.currentEntries, this.currentTableName, null);
 				updateTable(newData, this.currentEntries, this.currentTableName);
-				table.setEnabled(true);
+				if (accountStatus.equals("admin")) {
+					table.setEnabled(true);
+				}
 				lblT.setText("UPDATE SUCCESFUL");
 				lblT.setForeground(Color.blue);
 			} else if (pkValue == null) {

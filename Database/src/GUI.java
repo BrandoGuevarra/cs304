@@ -200,7 +200,7 @@ public class GUI implements TableModelListener {
 		mntmCheckReport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] reportInputName = {"REPORTERID", "REPORTERREGION"};
-				UserInput reportInput = new UserInput(reportInputName);
+				final UserInput reportInput = new UserInput(reportInputName);
 				reportInput.textField[0].setText(username);
 				reportInput.textField[1].setText(region);
 				reportInput.setVisible(true);
@@ -280,7 +280,7 @@ public class GUI implements TableModelListener {
 		mntmPurchase.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] championInputName = {"CHAMPION NAME"};
-				UserInput championInput = new UserInput(championInputName);
+				final UserInput championInput = new UserInput(championInputName);
 				championInput.setVisible(true);
 				
 				championInput.btnGo.addActionListener(new ActionListener() {
@@ -306,7 +306,7 @@ public class GUI implements TableModelListener {
 		mntmSkills.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] championInputName = {"PLAYERID", "PLAYERREGION", "CHAMPIONID"};
-				UserInput championInput = new UserInput(championInputName);
+				final UserInput championInput = new UserInput(championInputName);
 				championInput.textField[0].setText(username);
 				championInput.textField[1].setText(region);
 
@@ -333,7 +333,7 @@ public class GUI implements TableModelListener {
 		mntmBought.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] championInputName = {"CHAMPIONID"};
-				UserInput championInput = new UserInput(championInputName);
+				final UserInput championInput = new UserInput(championInputName);
 				championInput.setVisible(true);
 				
 				championInput.btnGo.addActionListener(new ActionListener() {
@@ -386,7 +386,7 @@ public class GUI implements TableModelListener {
 		mntmChampion.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] deleteInputName = {"CHAMPION NAME"};
-				UserInput deleteInput = new UserInput(deleteInputName);
+				final UserInput deleteInput = new UserInput(deleteInputName);
 				deleteInput.setVisible(true);
 				
 				deleteInput.btnGo.addActionListener(new ActionListener() {
@@ -408,7 +408,7 @@ public class GUI implements TableModelListener {
 		mntmSkill.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] deleteInputName = {"CHAMPION ID"};
-				UserInput deleteInput = new UserInput(deleteInputName);
+				final UserInput deleteInput = new UserInput(deleteInputName);
 				deleteInput.setVisible(true);
 				
 				deleteInput.btnGo.addActionListener(new ActionListener() {
@@ -435,7 +435,7 @@ public class GUI implements TableModelListener {
 		mntmUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] updateInputName = {"LEVEL", "USERNAME", "REGION"};
-				UserInput deleteInput = new UserInput(updateInputName);
+				final UserInput deleteInput = new UserInput(updateInputName);
 				deleteInput.setVisible(true);
 				
 				deleteInput.btnGo.addActionListener(new ActionListener() {
@@ -476,7 +476,7 @@ public class GUI implements TableModelListener {
 		mntmUpdateStatus.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] adminInputName = {"STATUS", "USERNAME", "REGION"};
-				UserInput adminInput = new UserInput(adminInputName);
+				final UserInput adminInput = new UserInput(adminInputName);
 				adminInput.setVisible(true);
 				
 				adminInput.btnGo.addActionListener(new ActionListener() {
@@ -516,7 +516,7 @@ public class GUI implements TableModelListener {
 	}
 	
 	private static void login() {
-		Login login = new Login();
+		final Login login = new Login();
 		login.setVisible(true);
 		login.btnLogin.addActionListener(new ActionListener() {
 		
@@ -648,7 +648,7 @@ public class GUI implements TableModelListener {
 		//menu from select is pressed to get whole column or to specify the selection
 		public void actionPerformed(ActionEvent e) {
 			if (entry.equals("custom")) {
-				Custom custom = new Custom();
+				final Custom custom = new Custom();
 				custom.textField.setText(this.header);
 				custom.textField_1.setText(this.header);
 				custom.setVisible(true);

@@ -44,6 +44,7 @@ public class GUI implements TableModelListener {
 	JMenu mnDelete = new JMenu("Delete");
 	JMenu mnUpdate = new JMenu("Update");
 	JMenu mnAdmin = new JMenu("Admin");
+	JMenu mnAccount = new JMenu("Account");
 	JLabel lblT = new JLabel("Messages");
 	static String accountStatus = "offline";
 	static String username;
@@ -96,6 +97,10 @@ public class GUI implements TableModelListener {
 			generateUpdateMenu();
 		}
 		
+		if (accountStatus.equals("online")) {
+			menuBar.add(mnAccount);
+			generateAccountMenu();
+		}
 		table = new JTable(model) {
 			public String getToolTipText(MouseEvent e) {
 				String tip = null;
@@ -222,6 +227,7 @@ public class GUI implements TableModelListener {
 					String[] entry = {"USERNAME", "REGION", "PASSWORD", "PLAYERLEVEL", "TIMESREPORTED", "RIOTPOINTS"
 							, "IPPOINTS", "DIVISION", "ACCOUNTSTATUS"};
 					String query = "SELECT * FROM PLAYER p WHERE NOT EXISTS(SELECT p1.USERNAME, p1.REGION FROM PLAYER p1"
+							+ " where p1.USERNAME != p.USERNAME"
 							+ " MINUS SELECT r.REPORTERID, r.REPORTERREGION FROM REPORT_A_PLAYER r "
 							+ "WHERE r.REPORTEEID = p.USERNAME AND r.REPORTEEREGION = p.REGION)";		
 								 
@@ -384,7 +390,6 @@ public class GUI implements TableModelListener {
 		JMenuItem mntmSkill = new JMenuItem("Skills1 (NOT CASCADE)");
 		mnDelete.add(mntmSkill);
 		
-		//CHECK integrity constraint ex: delete Ahri
 		mntmChampion.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String[] deleteInputName = {"CHAMPION NAME"};
@@ -499,6 +504,23 @@ public class GUI implements TableModelListener {
 		});
 	}
 	
+	
+	private void generateAccountMenu() {
+		JMenuItem mntmStatus = new JMenuItem("My Status");
+		mnAccount.add(mntmStatus);
+		
+		mntmStatus.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String [][] data;
+				String[] entry = {"USERNAME", "REGION", "PASSWORD", "PLAYERLEVEL", "TIMESREPORTED", "RIOTPOINTS"
+						, "IPPOINTS", "DIVISION", "ACCOUNTSTATUS"};
+				String query = "SELECT * from PLAYER WHERE USERNAME ='" + username +"' and region = '" + region + "'";
+				data = db.exactQuery(query, entry);
+				updateTable(data, entry, null);		
+			}
+		});	
+		
+	}
 	
 	private static void login() {
 		Login login = new Login();

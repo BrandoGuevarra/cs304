@@ -965,3 +965,33 @@ insert into Report_A_Player
 values('004', 'Huni', 'NA', 'Rush', 'KR', '041004112016',
 'boosted monkey man top laner, no counterplay');
 
+insert into Report_A_Player
+values('005', 'Jensen', 'NA', 'Impact', 'NA', '193015102016',
+'Top die but my team mid die');
+
+CREATE OR REPLACE TRIGGER champion_spending_reward
+AFTER INSERT ON Player_Purchase_Champion
+FOR EACH ROW
+BEGIN
+	IF :New.Cost > 4800 THEN
+	UPDATE Player SET riotPoints = riotPoints + 100
+	WHERE Player.Username = :NEW.playerID;
+	END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER rp_spending_reward
+AFTER UPDATE ON PLAYER
+FOR EACH ROW
+BEGIN
+	IF :NEW.riotPoints >= :OLD.riotPoints + 3000 THEN
+	UPDATE Purchase_And_Upgrade SET upgradeConversion = upgradeConversion * 0.5
+	WHERE Purchase_And_Upgrade.playerID = :NEW.Username;
+	INSERT INTO Player_Purchase_Champion
+	VALUES(:New.Username, :New.Region, 'Lee Sin', '4800', 'IP');
+	END IF;
+END;
+/
+
+
+

@@ -185,7 +185,7 @@ values('Hide on Bush', 'KR', '321',
 
 insert into Player
 values('DoubleLift', 'NA', 'yourealltrash',
-'30', '0', '900', '100000', 'Challenger', 'OK');
+'30', '26', '900', '100000', 'Challenger', 'OK');
 
 insert into Player
 values('Bjergsen', 'NA', '789',
@@ -950,11 +950,11 @@ insert into Champion_Stats2
 values('Fiora', '5', '0', '330');
 
 insert into Report_A_Player
-values('001', 'Hide on Bush', 'KR', 'Meateos', 'NA', '183707112016',
+values('001', 'Hide on Bush', 'KR', 'Meateos', 'NA' ,'183707112016',
 'This guy definitely scripting');
 
 insert into Report_A_Player
-values('002', 'mid fekar', 'NA', 'SneakyGASM', 'NA', '234011032016',
+values('002', 'mid fekar', 'NA', 'SneakyGASM', 'NA' ,'234011032016',
 'Intentionally troll plays xinzhao mid');
 
 insert into Report_A_Player
@@ -962,12 +962,118 @@ values('003', 'Aphromoo', 'NA', 'DoubleLift', 'NA', '000131102015',
 'He kicked me out of clg! Scrub teammate scrub clg');
 
 insert into Report_A_Player
-values('004', 'Huni', 'NA', 'Rush', 'KR', '041004112016',
+values('004', 'Froggen', 'NA', 'Bjergsen', 'NA', '041004112016',
 'boosted monkey man top laner, no counterplay');
 
 insert into Report_A_Player
 values('005', 'Jensen', 'NA', 'Impact', 'NA', '193015102016',
 'Top die but my team mid die');
+
+insert into Report_A_Player
+values('006', 'DoubleLift', 'NA', 'LemonNation', 'NA', '133026052016',
+'Flamed me for roaming');
+
+insert into Report_A_Player
+values('007', 'DoubleLift', 'NA', 'Hai', 'NA', '183026052016',
+'Took my blue buff');
+
+
+insert into Report_A_Player
+values('009', 'DoubleLift', 'NA', 'SneakyGASM', 'NA', '093031052016',
+'Didnt meme enough in game');
+
+insert into Report_A_Player
+values('010', 'DoubleLift', 'NA', 'Meateos', 'NA', '093005052016',
+'Didnt reach quarterfinals at worlds');
+
+insert into Report_A_Player
+values('011', 'DoubleLift', 'NA', 'Kikis', 'EU', '094005052016',
+'Got a penta kill against me..');
+
+insert into Report_A_Player
+values('012', 'DoubleLift', 'NA', 'FNC Febiven', 'EU', '105005052016',
+'Told me to uninstall the game');
+
+insert into Report_A_Player
+values('013', 'DoubleLift', 'NA', 'FNC Rekkles', 'EU', '105105052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('014', 'DoubleLift', 'NA', 'G2 ZV3N', 'EU', '105205052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('015', 'DoubleLift', 'NA', 'Ssumday', 'KR', '105305052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('016', 'DoubleLift', 'NA', 'Crown', 'KR', '105405052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('017', 'DoubleLift', 'NA', 'Smeb', 'KR', '105505052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('018', 'DoubleLift', 'NA', 'PraY', 'KR', '105605052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('019', 'DoubleLift', 'NA', 'Bang', 'KR', '105705052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('020', 'DoubleLift', 'NA', 'Rush', 'KR', '105805052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('021', 'DoubleLift', 'NA', 'Jensen', 'NA', '105905052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('022', 'DoubleLift', 'NA', 'Impact', 'NA', '110005052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('023', 'DoubleLift', 'NA', 'Huni', 'NA', '110105052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('024', 'DoubleLift', 'NA', 'Hauntzer', 'NA', '110205052016',
+'Thought Gengar was better');
+
+insert into Report_A_Player
+values('025', 'DoubleLift', 'NA', 'Froggen', 'NA', '110305052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('026', 'DoubleLift', 'NA', 'BunnyFuFuu', 'NA', '110405052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('027', 'DoubleLift', 'NA', 'Aphromoo', 'NA', '110505052016',
+'Told Febiven to uninstall the game');
+
+insert into Report_A_Player
+values('028', 'DoubleLift', 'NA', 'mid fekar', 'NA', '093131052016',
+'Didnt meme enough in game');
+
+insert into Report_A_Player
+values('029', 'DoubleLift', 'NA', 'Hide on Bush', 'KR', '093231052016',
+'Didnt meme enough in game');
+
+insert into Report_A_Player
+values('030', 'DoubleLift', 'NA', 'Bjergsen', 'NA', '093331052016',
+'Didnt meme enough in game');
+
+insert into Report_A_Player
+values('031', 'DoubleLift', 'NA', 'LemonNation', 'NA', '093431052016',
+'Didnt meme enough in game');
+
+insert into Report_A_Player
+values('032', 'DoubleLift', 'NA', 'EDG DEFT', 'KR', '095005052016',
+'Took ADC from me and feeds..');
+
 
 CREATE OR REPLACE TRIGGER champion_spending_reward
 AFTER INSERT ON Player_Purchase_Champion

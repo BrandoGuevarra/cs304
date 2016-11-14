@@ -167,7 +167,7 @@ public class GUI implements TableModelListener {
 			mntmReport.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					String[] reportInputName = {"REPORTEEID", "REPORTEEREGION", "OFFENDINGACTION"};
-					UserInput reportInput = new UserInput(reportInputName);
+					final UserInput reportInput = new UserInput(reportInputName);
 					reportInput.setVisible(true);
 					
 					reportInput.btnGo.addActionListener(new ActionListener() {
@@ -361,25 +361,18 @@ public class GUI implements TableModelListener {
 			}
 		});	
 		
-		//NOT SURE
 		mntmMostChampions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String[] championInputName = {"CHAMPIONID"};
-				UserInput championInput = new UserInput(championInputName);
-				championInput.setVisible(true);
 				
-				championInput.btnGo.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
 						String[][] data;
-						String[] entry = {"USRNAME", "REGION", "ACCOUNTSTATUS", "DIVISION"};
-						String query = "SELECT p.USERNAME, p.REGION, p.ACCOUNTSTATUS, p.DIVISION FROM PLAYER p "
-								+ "JOIN PLAYER_PURCHASE_CHAMPION c ON p.USERNAME= c.PLAYERID AND p.REGION = c.PLAYERID AND"
-								+ " CHAMPIONID= '" + championInput.textField[0].getText() + "'"; 
+						String[] entry = {"USERNAME", "REGION", "COUNT(*)"};
+						String query = "SELECT p.USERNAME, p.REGION, COUNT(*) FROM PLAYER p, PLAYER_PURCHASE_CHAMPION c "
+								+ "WHERE p.USERNAME = c.PLAYERID AND p.REGION = c.PLAYERREGION GROUP BY p.USERNAME, p.REGION "
+								+ "HAVING COUNT(*)= (SELECT MAX(c) FROM (SELECT COUNT(*) AS c FROM PLAYER p, PLAYER_PURCHASE_CHAMPION c"
+								+ " WHERE p.USERNAME = c.PLAYERID AND p.REGION = c.PLAYERREGION GROUP BY p.USERNAME, p.REGION))"; 
 						data = db.exactQuery(query, entry);
 						updateTable(data, entry, null);			
-						championInput.dispose();
-					}
-				});	
+
 			}
 		});	
 	}

@@ -260,8 +260,7 @@ public class GUI implements TableModelListener {
 	}
 	
 	private void generateChampionMenu() {
-		JMenuItem mntmPurchase = new JMenuItem("Purchase");
-		mnChampion.add(mntmPurchase);
+
 		
 		JMenuItem mntmSkills = new JMenuItem("Skills");
 		mnChampion.add(mntmSkills);
@@ -277,31 +276,39 @@ public class GUI implements TableModelListener {
 		JMenuItem mntmMostChampions = new JMenuItem("Players who purchased most champions");
 		mnChampion.add(mntmMostChampions);
 		
-		mntmPurchase.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String[] championInputName = {"CHAMPION NAME"};
-				final UserInput championInput = new UserInput(championInputName);
-				championInput.setVisible(true);
-				
-				championInput.btnGo.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						String cost = db.getValue("CHAMPION", "NAME", championInput.textField[0].getText(), "IPCOST");
-						String insert = "INSERT INTO PLAYER_PURCHASE_CHAMPION VALUES ('" + username + "', '" + region
-								+ "', '" + championInput.textField[0].getText() + "', '" + cost + "', 'IP')";
-						System.out.println(insert);
-						if (db.deletion(insert)) {
-							lblT.setText("PURCHASE SUCCESFUL");
-							lblT.setForeground(Color.blue);
-						} else {
-							lblT.setText("PURCHASE UNSUCCESFUL");
-							lblT.setForeground(Color.red);
+		if (accountStatus.equals("online")) {
+			JMenuItem mntmPurchase = new JMenuItem("Purchase");
+			mnChampion.add(mntmPurchase);
+			
+			mntmPurchase.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String[] championInputName = {"CHAMPION NAME"};
+					final UserInput championInput = new UserInput(championInputName);
+					championInput.setVisible(true);
+					
+					championInput.btnGo.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							String cost = db.getValue("CHAMPION", "NAME", championInput.textField[0].getText(), "IPCOST");
+							String insert = "INSERT INTO PLAYER_PURCHASE_CHAMPION VALUES ('" + username + "', '" + region
+									+ "', '" + championInput.textField[0].getText() + "', '" + cost + "', 'IP')";
+							System.out.println(insert);
+							if (db.deletion(insert)) {
+								db.deletion("UPDATE PLAYER SET IPPOINTS = IPPOINTS - "+ Integer.parseInt(cost) + " WHERE USERNAME = '"
+										+ username + "' AND REGION = '"
+										+ region + "'");
+								lblT.setText("PURCHASE SUCCESFUL");
+								lblT.setForeground(Color.blue);
+							} else {
+								lblT.setText("PURCHASE UNSUCCESFUL");
+								lblT.setForeground(Color.red);
+							}
+							championInput.dispose();
+	
 						}
-						championInput.dispose();
-
-					}
-				});	
-			}
-		});
+					});	
+				}
+			});
+		}
 
 		mntmSkills.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -431,6 +438,12 @@ public class GUI implements TableModelListener {
 	private void generateUpdateMenu() {
 		JMenuItem mntmUpdate = new JMenuItem("Update level");
 		mnUpdate.add(mntmUpdate);
+		
+		JMenuItem mntmUpdateRiotPoints = new JMenuItem("Update riot points");
+		mnUpdate.add(mntmUpdateRiotPoints);
+		
+		JMenuItem mntmUpdateStatus = new JMenuItem("Update Player status");
+		mnUpdate.add(mntmUpdateStatus);
 			
 		mntmUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -455,23 +468,28 @@ public class GUI implements TableModelListener {
 			}
 		});
 		
-	}
-	
-	private void generateAdminMenu() {
-		JMenuItem mntmAllReport = new JMenuItem("All reports");
-		mnAdmin.add(mntmAllReport);
-		JMenuItem mntmUpdateStatus = new JMenuItem("Update Player status");
-		mnAdmin.add(mntmUpdateStatus);
-		
-		mntmAllReport.addActionListener(new ActionListener() {
+		mntmUpdateRiotPoints.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String [][] data;
-				String[] entry = db.getEntries("REPORT_A_PLAYER");
-				String query = "SELECT * from REPORT_A_PLAYER";
-				data = db.exactQuery(query, entry);
-				updateTable(data, entry, null);		
+				String[] updateInputName = {"RIOTPOINTS", "USERNAME", "REGION"};
+				final UserInput deleteInput = new UserInput(updateInputName);
+				deleteInput.setVisible(true);
+				
+				deleteInput.btnGo.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String query = "UPDATE PLAYER SET RIOTPOINTS = '" + deleteInput.textField[0].getText() + "' WHERE USERNAME= '" 
+								+ deleteInput.textField[1].getText() + "' AND REGION= '" + deleteInput.textField[2].getText() + "'";
+						if (db.deletion(query)) {
+							lblT.setText("UPDATE SUCCESFUL");
+							lblT.setForeground(Color.blue);
+						} else {
+							lblT.setText("UPDATE UNSUCCESFUL");
+							lblT.setForeground(Color.red);
+						}
+						deleteInput.dispose();
+					}
+				});	
 			}
-		});	
+		});
 		
 		mntmUpdateStatus.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -495,6 +513,25 @@ public class GUI implements TableModelListener {
 				});	
 			}
 		});
+		
+	}
+	
+	private void generateAdminMenu() {
+		JMenuItem mntmAllReport = new JMenuItem("All reports");
+		mnAdmin.add(mntmAllReport);
+
+		
+		mntmAllReport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String [][] data;
+				String[] entry = db.getEntries("REPORT_A_PLAYER");
+				String query = "SELECT * from REPORT_A_PLAYER";
+				data = db.exactQuery(query, entry);
+				updateTable(data, entry, null);		
+			}
+		});	
+		
+		
 	}
 	
 	

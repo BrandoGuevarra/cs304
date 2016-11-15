@@ -570,19 +570,31 @@ insert into Champion
 values('Alistar', '1', '1350', 'Tank, Controller', 'Trample', 'Independent', '1');
 
 insert into Player_Purchase_Champion
-values('SneakyGASM', 'NA', 'Jhin', '6300', 'IP');
-
-insert into Player_Purchase_Champion
-values('PraY', 'KR', 'Ezreal', '4800', 'IP');
-
-insert into Player_Purchase_Champion
 values('Bjergsen', 'NA', 'Cassiopeia', '4800', 'IP');
+
+insert into Player_Purchase_Champion
+values('Bjergsen', 'NA', 'Rengar', '6300', 'IP');
+
+insert into Player_Purchase_Champion
+values('Bjergsen', 'NA', 'Yasuo', '6300', 'IP');
+
+insert into Player_Purchase_Champion
+values('Bjergsen', 'NA', 'Zac', '6300', 'IP');
 
 insert into Player_Purchase_Champion
 values('Aphromoo', 'NA', 'Alistar', '1350', 'IP');
 
 insert into Player_Purchase_Champion
-values('BunnyFuFuu', 'NA', 'Thresh', '6300', 'IP');
+values('BunnyFuFuu', 'NA', 'Alistar', '1350', 'IP');
+
+insert into Player_Purchase_Champion
+values('BunnyFuFuu', 'NA', 'Zac', '6300', 'IP');
+
+insert into Player_Purchase_Champion
+values('Meateos', 'NA', 'Zac', '6300', 'IP');
+
+insert into Player_Purchase_Champion
+values('Meateos', 'NA', 'Yasuo', '6300', 'IP');
 
 insert into Item
 values('Amplifying Tome', '435', 'null', 'null', 'Basic');

@@ -39,7 +39,7 @@ public class Login extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 960, 540);
 		try {
-			BufferedImage img = ImageIO.read(new File("img/background.jpg"));
+			BufferedImage img = ImageIO.read(new File("Database/src/background.jpg"));
 			background = new JLabel(new ImageIcon(img));
 			background.setBounds(0, 0, 944, 501);
 			background.setOpaque(false);

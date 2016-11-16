@@ -295,12 +295,13 @@ public class GUI implements TableModelListener {
 					
 					championInput.btnGo.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
-							String cost = db.getValue("CHAMPION", "NAME", championInput.textField[0].getText(), "IPCOST");
+							int cost = Integer.parseInt(db.getValue("CHAMPION", "NAME", championInput.textField[0].getText(), "IPCOST"));
 							String insert = "INSERT INTO PLAYER_PURCHASE_CHAMPION VALUES ('" + username + "', '" + region
 									+ "', '" + championInput.textField[0].getText() + "', '" + cost + "', 'IP')";
+                            int currentIPPoints = Integer.parseInt(db.getValue("PLAYER", "USERNAME", username, "IPPOINTS"));
 							System.out.println(insert);
-							if (db.deletion(insert)) {
-								db.deletion("UPDATE PLAYER SET IPPOINTS = IPPOINTS - "+ Integer.parseInt(cost) + " WHERE USERNAME = '"
+							if ( currentIPPoints >= cost && db.deletion(insert)) {
+								db.deletion("UPDATE PLAYER SET IPPOINTS = IPPOINTS - "+ cost + " WHERE USERNAME = '"
 										+ username + "' AND REGION = '"
 										+ region + "'");
 								lblT.setText("PURCHASE SUCCESFUL");

@@ -27,6 +27,9 @@ CREATE TABLE Player(
 ALTER TABLE Player
 ADD CHECK (playerLevel > 0);
 
+ALTER TABLE Player
+ADD CHECK (ipPoints > 0);
+
 grant select on Player to public;
 
 

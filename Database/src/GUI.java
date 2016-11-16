@@ -18,12 +18,17 @@ import javax.swing.JLabel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
 
 public class GUI implements TableModelListener {
 
@@ -74,6 +79,8 @@ public class GUI implements TableModelListener {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 1000, 550);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+
 		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -361,8 +368,10 @@ public class GUI implements TableModelListener {
 		mntmMaxSkill.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String [][] data;
-				String[] entry = {"MAX(DAMAGE)"};
-				String query = "SELECT max(DAMAGE) from CHAMPION_SKILLS2";
+				String[] entry = {"NAME", "CHAMPIONLEVEL", "FACTION", "MAX(DAMAGE)"};
+				String query = "SELECT c.NAME, c.CHAMPIONLEVEL, c.FACTION, MAX(DAMAGE) FROM CHAMPION c, CHAMPION_SKILLS2 s "
+						+ "WHERE c.NAME = s.CHAMPIONID AND s.DAMAGE = (SELECT MAX(DAMAGE) FROM CHAMPION_SKILLS2)"
+						+ " GROUP BY c.NAME, c.CHAMPIONLEVEL, c.FACTION";
 				data = db.exactQuery(query, entry);
 				updateTable(data, entry, null);		
 			}

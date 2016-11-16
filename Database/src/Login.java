@@ -1,5 +1,9 @@
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -12,93 +16,86 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
+import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import java.awt.Color;
 
 public class Login extends JFrame {
 
-	private JPanel contentPane;
-	 JTextField textField;
-	 JPasswordField passwordField;
+	JTextField textField;
+	JPasswordField passwordField;
 	private JLabel lblRegion;
-	 final ButtonGroup buttonGroup = new ButtonGroup();
+	final ButtonGroup buttonGroup = new ButtonGroup();
 	private JRadioButton rdbtnNewRadioButton;
 	private JRadioButton rdbtnNewRadioButton_1;
 	private JRadioButton rdbtnNewRadioButton_2;
-	 JButton btnLogin;
-	  JLabel label;
-
+	JButton btnLogin;
+	JLabel label;
+	JLabel background;
 	
-	public Login() {
+	public Login() {	
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(new FormLayout(new ColumnSpec[] {
-				FormSpecs.RELATED_GAP_COLSPEC,
-				FormSpecs.DEFAULT_COLSPEC,
-				FormSpecs.RELATED_GAP_COLSPEC,
-				ColumnSpec.decode("default:grow"),},
-			new RowSpec[] {
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,}));
-		
+		setBounds(100, 100, 960, 540);
+		try {
+			BufferedImage img = ImageIO.read(new File("img/background.jpg"));
+			background = new JLabel(new ImageIcon(img));
+			background.setBounds(0, 0, 944, 501);
+			background.setOpaque(false);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		getContentPane().setLayout(null);
+		getContentPane().add(background);
+		background.setLayout(new FlowLayout());
+
 		JLabel lblUsername = new JLabel("Username:");
-		contentPane.add(lblUsername, "2, 2, right, default");
-		
+		lblUsername.setForeground(Color.WHITE);
+		background.add(lblUsername);
+	
 		textField = new JTextField();
-		contentPane.add(textField, "4, 2, fill, default");
+		background.add(textField);
 		textField.setColumns(10);
-		
+
 		JLabel lblPassword = new JLabel("Password: ");
-		contentPane.add(lblPassword, "2, 6, right, default");
+		lblPassword.setForeground(Color.WHITE);
+		background.add(lblPassword);
 		
 		passwordField = new JPasswordField();
-		contentPane.add(passwordField, "4, 6, fill, default");
-		
+		background.add(passwordField);
+		passwordField.setColumns(10);
+
 		lblRegion = new JLabel("Region:");
-		contentPane.add(lblRegion, "2, 10");
+		lblRegion.setForeground(Color.WHITE);
+		background.add(lblRegion);
 		
 		rdbtnNewRadioButton = new JRadioButton("NA");
 		rdbtnNewRadioButton.setSelected(true);
 		rdbtnNewRadioButton.setActionCommand("NA");
 		buttonGroup.add(rdbtnNewRadioButton);
-		contentPane.add(rdbtnNewRadioButton, "4, 10");
+		background.add(rdbtnNewRadioButton);
 		
 		rdbtnNewRadioButton_1 = new JRadioButton("EU");
 		rdbtnNewRadioButton_1.setActionCommand("EU");
 
 		buttonGroup.add(rdbtnNewRadioButton_1);
-		contentPane.add(rdbtnNewRadioButton_1, "4, 12");
+		background.add(rdbtnNewRadioButton_1);
 		
 		rdbtnNewRadioButton_2 = new JRadioButton("KR");
 		rdbtnNewRadioButton_2.setActionCommand("KR");
 
 		buttonGroup.add(rdbtnNewRadioButton_2);
-		contentPane.add(rdbtnNewRadioButton_2, "4, 14");
+		background.add(rdbtnNewRadioButton_2);
 		
 		btnLogin = new JButton("Login");
-		contentPane.add(btnLogin, "4, 16");
+		background.add(btnLogin);
 		
 		label = new JLabel("");
-		contentPane.add(label, "4, 18");
+		background.add(label);
+		
+		
+		
 	}
 
 }

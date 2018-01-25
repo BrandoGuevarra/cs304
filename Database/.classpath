@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src" />
-	<classpathentry kind="src" path="img" />
-	<classpathentry kind="con"
-		path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8" />
-	<classpathentry kind="lib"
-		path="C:/Users/Brando/CPSC304/project/Database/classes12.zip" />
-	<classpathentry kind="lib" path="lib/jgoodies-forms.jar"
-		sourcepath="lib/jgoodies-forms-sources.jar">
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="img"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="lib/jgoodies-forms.jar" sourcepath="lib/jgoodies-forms-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location"
-				value="jar:platform:/resource/Database/lib/jgoodies-forms-javadoc.jar!/" />
+			<attribute name="javadoc_location" value="jar:platform:/resource/Database/lib/jgoodies-forms-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jgoodies-common.jar"
-		sourcepath="lib/jgoodies-common-sources.jar">
+	<classpathentry kind="lib" path="lib/jgoodies-common.jar" sourcepath="lib/jgoodies-common-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location"
-				value="jar:platform:/resource/Database/lib/jgoodies-common-javadoc.jar!/" />
+			<attribute name="javadoc_location" value="jar:platform:/resource/Database/lib/jgoodies-common-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="miglayout15-swing.jar"
-		sourcepath="miglayout-src.zip" />
-	<classpathentry kind="output" path="bin" />
+	<classpathentry kind="lib" path="lib/classes12.zip"/>
+	<classpathentry kind="lib" path="lib/miglayout15-swing.jar"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

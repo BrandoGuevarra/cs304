@@ -13,12 +13,12 @@ public class Database {
 	}
 	
 	private static Connection connect() {
-		String url = "jdbc:oracle:thin:@localhost:1522:ug";
-		String user = "ora_k5o0b";
-		String password = "a54223152";
+		String url = "jdbc:mysql://localhost:3306/gamedb";
+		String user = "root";
+		String password = "admincs";
 		
 		try {
-			Class.forName("oracle.jdbc.driver.OracleDriver");
+			Class.forName("com.mysql.jdbc.Driver");
 		} catch(java.lang.ClassNotFoundException e) {
 			System.err.print("ClassNotFoundException: ");
 			System.err.println(e.getMessage());

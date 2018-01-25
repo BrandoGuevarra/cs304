@@ -85,9 +85,7 @@ CREATE TABLE Item_upgradeInto_Item(
 	itemID1 varchar(30),
 	itemID2 varchar(30),
 	upgradePointsRequired INTEGER,
-	PRIMARY KEY(itemID1, itemID2),
-	FOREIGN KEY (itemID1) REFERENCES Item,
-	FOREIGN KEY (itemID2) REFERENCES Item);
+	PRIMARY KEY(itemID1, itemID2));
 
 grant select on Item_upgradeInto_Item to public;
 
@@ -150,7 +148,7 @@ CREATE TABLE Report_A_Player(
 	reporteeRegion varchar(10) not null,
 	reporterID varchar(15) not null,
 	reporterRegion varchar(10) not null,
-	reportedTimeDayMonthYear INTEGER not null,
+	reportedTimeDayMonthYear DOUBLE not null,
 	offendingAction varchar(50) not null,
 	PRIMARY KEY(reportID),
 	FOREIGN KEY (reporteeID, reporteeRegion) REFERENCES Player(Username, Region),
@@ -1089,30 +1087,6 @@ insert into Report_A_Player
 values('032', 'DoubleLift', 'NA', 'EDG DEFT', 'KR', '095005052016',
 'Took ADC from me and feeds..');
 
-
-CREATE OR REPLACE TRIGGER champion_spending_reward
-AFTER INSERT ON Player_Purchase_Champion
-FOR EACH ROW
-BEGIN
-	IF :New.Cost > 4800 THEN
-	UPDATE Player SET riotPoints = riotPoints + 100
-	WHERE Player.Username = :NEW.playerID;
-	END IF;
-END;
-/
-
-CREATE OR REPLACE TRIGGER rp_spending_reward
-AFTER UPDATE ON PLAYER
-FOR EACH ROW
-BEGIN
-	IF :NEW.riotPoints >= :OLD.riotPoints + 3000 THEN
-	UPDATE Purchase_And_Upgrade SET upgradeConversion = upgradeConversion * 0.5
-	WHERE Purchase_And_Upgrade.playerID = :NEW.Username;
-	INSERT INTO Player_Purchase_Champion
-	VALUES(:New.Username, :New.Region, 'Lee Sin', '4800', 'IP');
-	END IF;
-END;
-/
 
 
 
